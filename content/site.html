@@ -233,6 +233,12 @@
   }
   .tbd-note strong{color:var(--text); display:block; margin-bottom:4px; font-size:15.5px; font-weight:600;}
   .schedule-list{display:flex; flex-direction:column; gap:12px;}
+  .sched-card-clear{
+    background:var(--surface); border:1px solid var(--border); border-top:3px solid var(--accent);
+    padding:26px 28px;
+  }
+  .sched-card-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .sched-card-title{font-family:"Big Shoulders Display",sans-serif; font-weight:800; text-transform:uppercase; font-size:22px; margin-top:8px;}
   .sched-card{
     display:grid; grid-template-columns:82px 1fr auto; gap:20px; align-items:center;
     background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); padding:22px;
@@ -576,24 +582,22 @@
     </div>
 
     <div class="schedule-list">
-      <div class="sched-card">
-        <div class="date-badge"><div class="mo">OCT</div><div class="d">17</div><div class="wd">SAT</div></div>
-        <div class="sched-info">
-          <div class="name">Diamond Bar VEX IQ Level Up Tournament 1</div>
-          <div class="details">
-            <span>📍 23300 Golden Springs Drive, Diamond Bar, CA 91765</span>
+      <div class="sched-card-clear">
+        <div class="sched-card-head">
+          <div>
+            <span class="eyebrow">Next Competition · Confirmed</span>
+            <div class="sched-card-title">Diamond Bar VEX IQ Level Up Tournament 1</div>
           </div>
-          <div class="details" style="margin-top:6px;">
-            <span>🕗 Check-in 8:00 AM · Ends ~4:00 PM</span>
-          </div>
-          <div class="details" style="margin-top:6px;">
-            <span>Competing: Team A · Team B · Team M</span>
-          </div>
-          <div class="details" style="margin-top:6px;">
-            <span style="color:var(--warning); font-weight:600;">Pre-match online interview: time TBA from event host</span>
-          </div>
+          <span class="status-pill">Confirmed</span>
         </div>
-        <span class="status-pill">Confirmed</span>
+        <div class="announce-facts">
+          <div class="announce-fact"><span class="l">Date</span><span class="v">Saturday, October 17, 2026</span></div>
+          <div class="announce-fact"><span class="l">Check-In</span><span class="v">8:00 AM</span></div>
+          <div class="announce-fact"><span class="l">Ends</span><span class="v">Approximately 4:00 PM</span></div>
+          <div class="announce-fact"><span class="l">Location</span><span class="v">23300 Golden Springs Drive<br>Diamond Bar, CA 91765</span></div>
+          <div class="announce-fact"><span class="l">Competing</span><span class="v">Team A · Team B · Team M</span></div>
+        </div>
+        <div class="announce-note">Pre-match online interview time is still TBA from the event host — we'll update this as soon as it's confirmed.</div>
       </div>
 
       <div class="tbd-note">
