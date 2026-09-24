@@ -1130,10 +1130,21 @@
       <a href="#schedule">Schedule</a> · <a href="#values">Team Values</a> · <a href="#faq">FAQ</a>
     </div>
   </div>
+  <div class="wrap" style="margin-top:22px; padding-top:16px; border-top:1px solid var(--border); font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em;">
+    <span id="footerUpdated">Continuously updated</span>
+  </div>
 </footer>
 
 <script>
 (function(){
+  try{
+    var footerUpdated=document.getElementById('footerUpdated');
+    if(footerUpdated){
+      var todayStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+      footerUpdated.textContent='Continuously updated · Today: '+todayStr;
+    }
+  }catch(e){}
+
   try{
     var PAGE_IDS=['home','schedule','practice','notices','values','announcements','coach','faq'];
 
