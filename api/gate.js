@@ -1,6 +1,5 @@
-const fs = require('fs');
-const path = require('path');
 const { getSession } = require('./_session');
+const html = require('./_site-content');
 
 module.exports = (req, res) => {
   const session = getSession(req);
@@ -10,8 +9,6 @@ module.exports = (req, res) => {
     res.end();
     return;
   }
-  const filePath = path.join(process.cwd(), 'content', 'site.html');
-  const html = fs.readFileSync(filePath, 'utf8');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
   res.statusCode = 200;
