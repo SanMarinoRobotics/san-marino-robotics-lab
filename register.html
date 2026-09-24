@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Request Access — San Marino Robotics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7fa; --surface:#ffffff; --surface-2:#eef2f7; --border:#dde3ea;
+    --text:#11161d; --text-dim:#57606b; --accent:#e2231a; --accent-2:#c81810;
+    --accent-soft:#fdeceb; --steel:#1a63e0; --success:#1f9d55; --success-soft:#e4f7ea;
+    --danger:#c81810; --danger-soft:#fdeceb;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",sans-serif; padding:20px;
+  }
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-top:4px solid var(--steel);
+    max-width:440px; width:100%; padding:32px 28px;
+  }
+  .mark{
+    width:44px; height:44px; background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--accent-2);
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:16px; margin-bottom:16px;
+  }
+  h1{font-family:"Big Shoulders Display",sans-serif; font-weight:800; text-transform:uppercase; font-size:24px; margin:0;}
+  p.sub{color:var(--text-dim); font-size:14px; margin:6px 0 24px; line-height:1.5;}
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  input{
+    width:100%; padding:12px 14px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--text); font-size:14.5px; font-family:inherit; margin-bottom:16px;
+  }
+  input:focus{outline:2px solid var(--steel); outline-offset:1px;}
+  button{
+    width:100%; padding:14px; background:var(--steel); color:#fff; border:none;
+    font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+  }
+  button:hover{background:#154fb8;}
+  button:disabled{opacity:.6; cursor:default;}
+  .error{background:var(--danger-soft); color:var(--danger); font-size:13.5px; padding:10px 12px; margin-bottom:16px; display:none;}
+  .success{background:var(--success-soft); color:var(--success); font-size:14px; padding:16px; text-align:center; display:none; line-height:1.6;}
+  .foot{margin-top:20px; font-size:13.5px; color:var(--text-dim); text-align:center;}
+  a{color:var(--steel); font-weight:600; text-decoration:none;}
+  #formArea.hidden{display:none;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark">SM</div>
+    <h1>Request Access</h1>
+    <p class="sub">Fill this out once. The club admin will review your request and approve your account — you'll be able to log in once approved.</p>
+
+    <div class="success" id="successBox">
+      ✅ Your request has been submitted. The admin will review it and let you know once your account is approved.
+    </div>
+
+    <div id="formArea">
+      <div class="error" id="err"></div>
+      <form id="regForm">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" required autocomplete="name">
+        <label for="email">Email</label>
+        <input type="email" id="email" required autocomplete="email">
+        <label for="childName">Child's Name</label>
+        <input type="text" id="childName" autocomplete="off">
+        <label for="team">Child's Team (if known)</label>
+        <input type="text" id="team" placeholder="e.g. Team A" autocomplete="off">
+        <label for="password">Create a Password</label>
+        <input type="password" id="password" required minlength="8" autocomplete="new-password">
+        <label for="password2">Confirm Password</label>
+        <input type="password" id="password2" required minlength="8" autocomplete="new-password">
+        <button type="submit" id="submitBtn">Submit Request</button>
+      </form>
+    </div>
+
+    <div class="foot">Already approved? <a href="/login.html">Log in</a></div>
+  </div>
+
+  <script>
+    var form = document.getElementById('regForm');
+    var errBox = document.getElementById('err');
+    var btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errBox.style.display = 'none';
+
+      var password = document.getElementById('password').value;
+      var password2 = document.getElementById('password2').value;
+      if (password !== password2) {
+        errBox.textContent = 'Passwords do not match.';
+        errBox.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          childName: document.getElementById('childName').value,
+          team: document.getElementById('team').value,
+          password: password
+        })
+      })
+      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (res.ok) {
+          document.getElementById('formArea').classList.add('hidden');
+          document.getElementById('successBox').style.display = 'block';
+        } else {
+          errBox.textContent = res.data.error || 'Something went wrong.';
+          errBox.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Submit Request';
+        }
+      })
+      .catch(function(){
+        errBox.textContent = 'Network error. Please try again.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Submit Request';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sign In — San Marino Robotics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7fa; --surface:#ffffff; --surface-2:#eef2f7; --border:#dde3ea;
+    --text:#11161d; --text-dim:#57606b; --accent:#e2231a; --accent-2:#c81810;
+    --accent-soft:#fdeceb; --steel:#1a63e0; --danger:#c81810; --danger-soft:#fdeceb;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",sans-serif; padding:20px;
+  }
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-top:4px solid var(--accent);
+    max-width:400px; width:100%; padding:32px 28px;
+  }
+  .mark{
+    width:44px; height:44px; background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; color:var(--accent-2);
+    font-family:"Big Shoulders Display",sans-serif; font-weight:800; font-size:16px; margin-bottom:16px;
+  }
+  h1{font-family:"Big Shoulders Display",sans-serif; font-weight:800; text-transform:uppercase; font-size:24px; margin:0;}
+  p.sub{color:var(--text-dim); font-size:14px; margin:6px 0 24px;}
+  label{display:block; font-size:12.5px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  input{
+    width:100%; padding:12px 14px; border:1px solid var(--border); background:var(--surface-2);
+    color:var(--text); font-size:14.5px; font-family:inherit; margin-bottom:16px;
+  }
+  input:focus{outline:2px solid var(--steel); outline-offset:1px;}
+  button{
+    width:100%; padding:14px; background:var(--accent); color:#fff; border:none;
+    font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase; cursor:pointer;
+  }
+  button:hover{background:#c91d15;}
+  button:disabled{opacity:.6; cursor:default;}
+  .error{background:var(--danger-soft); color:var(--danger); font-size:13.5px; padding:10px 12px; margin-bottom:16px; display:none;}
+  .foot{margin-top:20px; font-size:13.5px; color:var(--text-dim); text-align:center;}
+  a{color:var(--steel); font-weight:600; text-decoration:none;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="mark">SM</div>
+    <h1>Parent Sign In</h1>
+    <p class="sub">San Marino Robotics Lab — VEX IQ season hub</p>
+
+    <div class="error" id="err"></div>
+
+    <form id="loginForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" required autocomplete="email">
+      <label for="password">Password</label>
+      <input type="password" id="password" required autocomplete="current-password">
+      <button type="submit" id="submitBtn">Log In</button>
+    </form>
+
+    <div class="foot">Don't have access yet? <a href="/register.html">Request an account</a></div>
+  </div>
+
+  <script>
+    var form = document.getElementById('loginForm');
+    var errBox = document.getElementById('err');
+    var btn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errBox.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Signing In…';
+
+      fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value
+        })
+      })
+      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        if (res.ok) {
+          window.location.href = '/';
+        } else {
+          errBox.textContent = res.data.error || 'Login failed.';
+          errBox.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Log In';
+        }
+      })
+      .catch(function(){
+        errBox.textContent = 'Network error. Please try again.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Log In';
+      });
+    });
+  </script>
+</body>
+</html>
