@@ -48,7 +48,9 @@ module.exports = async (req, res) => {
     res.statusCode = 200;
     res.json({ ok: true });
   } catch (err) {
-    console.error('REGISTER_ERROR', err && err.message, err && err.stack);
+    var raw = process.env.MONGODB_URI || '';
+    console.error('REGISTER_ERROR', err && err.message);
+    console.error('URI_DEBUG len=' + raw.length + ' start=' + JSON.stringify(raw.slice(0, 14)) + ' end=' + JSON.stringify(raw.slice(-14)));
     res.statusCode = 500;
     res.json({ error: 'Something went wrong. Please try again in a moment.' });
   }
