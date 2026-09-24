@@ -1,5 +1,6 @@
 // Usage: node scripts/approve.js someone@example.com
 const { MongoClient } = require('mongodb');
+const { sendApprovalEmail } = require('./_email');
 
 async function main() {
   const email = (process.argv[2] || '').trim().toLowerCase();
@@ -15,6 +16,7 @@ async function main() {
   const client = new MongoClient(uri);
   await client.connect();
   const db = client.db();
+  const parent = await db.collection('parents').findOne({ email });
   const result = await db.collection('parents').updateOne(
     { email },
     { $set: { status: 'approved', approvedAt: new Date() } }
@@ -23,6 +25,7 @@ async function main() {
     console.log(`No pending request found for ${email}.`);
   } else {
     console.log(`Approved: ${email}`);
+    await sendApprovalEmail(email, parent && parent.name);
   }
   await client.close();
 }
