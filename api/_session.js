@@ -1,7 +1,8 @@
 const crypto = require('crypto');
 
 const COOKIE_NAME = 'sma_session';
-const MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
+const LONG_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days — "keep me logged in"
+const SHORT_TTL_SECONDS = 60 * 60 * 12; // 12 hours — not remembered
 
 function getSecret() {
   const secret = process.env.SESSION_SECRET;
@@ -13,8 +14,8 @@ function sign(value) {
   return crypto.createHmac('sha256', getSecret()).update(value).digest('base64url');
 }
 
-function createToken(email) {
-  const payload = JSON.stringify({ email, exp: Date.now() + MAX_AGE_SECONDS * 1000 });
+function createToken(email, ttlSeconds) {
+  const payload = JSON.stringify({ email, exp: Date.now() + ttlSeconds * 1000 });
   const encoded = Buffer.from(payload).toString('base64url');
   const signature = sign(encoded);
   return `${encoded}.${signature}`;
@@ -55,12 +56,14 @@ function getSession(req) {
   return verifyToken(token);
 }
 
-function setSessionCookie(res, email) {
-  const token = createToken(email);
-  res.setHeader(
-    'Set-Cookie',
-    `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${MAX_AGE_SECONDS}`
-  );
+function setSessionCookie(res, email, remember) {
+  const ttlSeconds = remember ? LONG_TTL_SECONDS : SHORT_TTL_SECONDS;
+  const token = createToken(email, ttlSeconds);
+  let cookie = `${COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Lax; Path=/`;
+  // Only "remembered" sessions get a persistent Max-Age; otherwise the cookie
+  // is a browser-session cookie (cleared on close) with a 12h server-side cap.
+  if (remember) cookie += `; Max-Age=${LONG_TTL_SECONDS}`;
+  res.setHeader('Set-Cookie', cookie);
 }
 
 function clearSessionCookie(res) {

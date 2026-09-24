@@ -6,7 +6,7 @@
 <title>Request Access — San Marino Robotics Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#f5f7fa; --surface:#ffffff; --surface-2:#eef2f7; --border:#dde3ea;
@@ -16,13 +16,19 @@
     color-scheme:light;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
     margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
     background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",sans-serif; padding:20px;
+    position:relative; overflow-x:hidden;
   }
+  .bg-watermark{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+  .bg-watermark svg{position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:1200px; max-width:160%; color:var(--text); opacity:.06;}
   .card{
+    position:relative; z-index:1;
     background:var(--surface); border:1px solid var(--border); border-top:4px solid var(--steel);
     max-width:440px; width:100%; padding:32px 28px;
+    box-shadow:0 30px 60px -30px rgba(20,20,20,.15);
   }
   .mark{
     width:44px; height:44px; background:var(--surface-2); border:1px solid var(--border);
@@ -32,6 +38,7 @@
   h1{font-family:"Big Shoulders Display",sans-serif; font-weight:800; text-transform:uppercase; font-size:24px; margin:0;}
   p.sub{color:var(--text-dim); font-size:14px; margin:6px 0 24px; line-height:1.5;}
   label{display:block; font-size:12.5px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+  label .req{color:var(--accent-2);}
   input{
     width:100%; padding:12px 14px; border:1px solid var(--border); background:var(--surface-2);
     color:var(--text); font-size:14.5px; font-family:inherit; margin-bottom:16px;
@@ -51,6 +58,36 @@
 </style>
 </head>
 <body>
+  <div class="bg-watermark" aria-hidden="true">
+    <svg viewBox="0 0 800 320" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0,280 Q200,265 400,275 T800,270"/>
+      <path d="M330,280 V210 H470 V280"/>
+      <path d="M330,210 L400,175 L470,210"/>
+      <line x1="345" y1="210" x2="345" y2="280"/>
+      <line x1="375" y1="210" x2="375" y2="280"/>
+      <line x1="400" y1="210" x2="400" y2="280"/>
+      <line x1="425" y1="210" x2="425" y2="280"/>
+      <line x1="455" y1="210" x2="455" y2="280"/>
+      <rect x="380" y="165" width="40" height="45"/>
+      <path d="M380,165 A20,32 0 0 1 420,165"/>
+      <line x1="400" y1="133" x2="400" y2="118"/>
+      <circle cx="400" cy="112" r="4"/>
+      <path d="M150,280 Q145,230 160,190"/>
+      <path d="M160,190 Q140,175 115,178"/>
+      <path d="M160,190 Q145,165 122,155"/>
+      <path d="M160,190 Q165,160 155,135"/>
+      <path d="M160,190 Q180,165 205,155"/>
+      <path d="M160,190 Q185,175 210,180"/>
+      <path d="M650,280 Q656,225 640,185"/>
+      <path d="M640,185 Q660,170 685,173"/>
+      <path d="M640,185 Q655,160 678,150"/>
+      <path d="M640,185 Q635,155 645,130"/>
+      <path d="M640,185 Q620,160 595,150"/>
+      <path d="M640,185 Q615,170 590,175"/>
+      <text x="400" y="308" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="15" letter-spacing="5" stroke="none" fill="currentColor">SAN MARINO, CALIFORNIA</text>
+    </svg>
+  </div>
+
   <div class="card">
     <div class="mark">SM</div>
     <h1>Request Access</h1>
@@ -63,17 +100,17 @@
     <div id="formArea">
       <div class="error" id="err"></div>
       <form id="regForm">
-        <label for="name">Your Name</label>
+        <label for="name">Your Name <span class="req">*</span></label>
         <input type="text" id="name" required autocomplete="name">
-        <label for="email">Email</label>
+        <label for="email">Email <span class="req">*</span></label>
         <input type="email" id="email" required autocomplete="email">
-        <label for="childName">Child's Name</label>
-        <input type="text" id="childName" autocomplete="off">
-        <label for="team">Child's Team (if known)</label>
-        <input type="text" id="team" placeholder="e.g. Team A" autocomplete="off">
-        <label for="password">Create a Password</label>
+        <label for="childName">Child's Name <span class="req">*</span></label>
+        <input type="text" id="childName" required autocomplete="off">
+        <label for="team">Child's Team <span class="req">*</span></label>
+        <input type="text" id="team" placeholder="e.g. Team A" required autocomplete="off">
+        <label for="password">Create a Password <span class="req">*</span></label>
         <input type="password" id="password" required minlength="8" autocomplete="new-password">
-        <label for="password2">Confirm Password</label>
+        <label for="password2">Confirm Password <span class="req">*</span></label>
         <input type="password" id="password2" required minlength="8" autocomplete="new-password">
         <button type="submit" id="submitBtn">Submit Request</button>
       </form>

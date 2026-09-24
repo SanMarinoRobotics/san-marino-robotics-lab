@@ -11,7 +11,7 @@ module.exports = (req, res) => {
     return;
   }
 
-  setSessionCookie(res, 'admin@san-marino-robotics-lab');
+  setSessionCookie(res, 'admin@san-marino-robotics-lab', true);
   var next = url.searchParams.get('next');
   var safeNext = next === '/admin.html' ? next : '/';
   res.statusCode = 302;

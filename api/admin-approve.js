@@ -24,10 +24,32 @@ module.exports = async (req, res) => {
       res.json({ error: 'Missing email.' });
       return;
     }
-    const newStatus = action === 'reject' ? 'rejected' : 'approved';
 
     const db = await getDb();
-    const result = await db.collection('parents').updateOne(
+    const parents = db.collection('parents');
+
+    if (action === 'approve-reset' || action === 'dismiss-reset') {
+      const parent = await parents.findOne({ email: normalizedEmail });
+      if (!parent || !parent.resetRequest) {
+        res.statusCode = 404;
+        res.json({ error: 'No pending reset request for that email.' });
+        return;
+      }
+      if (action === 'approve-reset') {
+        await parents.updateOne(
+          { email: normalizedEmail },
+          { $set: { passwordHash: parent.resetRequest.passwordHash }, $unset: { resetRequest: '' } }
+        );
+      } else {
+        await parents.updateOne({ email: normalizedEmail }, { $unset: { resetRequest: '' } });
+      }
+      res.statusCode = 200;
+      res.json({ ok: true });
+      return;
+    }
+
+    const newStatus = action === 'reject' ? 'rejected' : 'approved';
+    const result = await parents.updateOne(
       { email: normalizedEmail },
       { $set: { status: newStatus, decidedAt: new Date() } }
     );

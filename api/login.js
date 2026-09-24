@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { email, password } = req.body || {};
+    const { email, password, remember } = req.body || {};
     if (!email || !password) {
       res.statusCode = 400;
       res.json({ error: 'Please enter your email and password.' });
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       return;
     }
 
-    setSessionCookie(res, normalizedEmail);
+    setSessionCookie(res, normalizedEmail, !!remember);
     res.statusCode = 200;
     res.json({ ok: true });
   } catch (err) {

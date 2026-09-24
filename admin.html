@@ -54,6 +54,8 @@
     <div id="app">
       <div class="section-title">Pending Requests</div>
       <div id="pendingList"></div>
+      <div class="section-title">Password Reset Requests</div>
+      <div id="resetList"></div>
       <div class="section-title">Approved</div>
       <div id="approvedList"></div>
       <div class="section-title">Rejected</div>
@@ -99,6 +101,34 @@
       return div;
     }
 
+    function renderResetCard(p){
+      var div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML =
+        '<div class="info">' +
+          '<div class="name">' + (p.name || '(no name)') + ' <span class="badge pending">reset requested</span></div>' +
+          '<div class="email">' + p.email + '</div>' +
+          '<div class="meta">Requested ' + fmtDate(p.resetRequest && p.resetRequest.requestedAt) + '</div>' +
+        '</div>';
+      var actions = document.createElement('div');
+      actions.className = 'actions';
+
+      var approveBtn = document.createElement('button');
+      approveBtn.className = 'btn-approve';
+      approveBtn.textContent = 'Approve Reset';
+      approveBtn.onclick = function(){ decide(p.email, 'approve-reset'); };
+
+      var dismissBtn = document.createElement('button');
+      dismissBtn.className = 'btn-reject';
+      dismissBtn.textContent = 'Dismiss';
+      dismissBtn.onclick = function(){ decide(p.email, 'dismiss-reset'); };
+
+      actions.appendChild(approveBtn);
+      actions.appendChild(dismissBtn);
+      div.appendChild(actions);
+      return div;
+    }
+
     function decide(email, action){
       fetch('/api/admin-approve', {
         method: 'POST',
@@ -126,11 +156,17 @@
           var pending = parents.filter(function(p){ return p.status === 'pending'; });
           var approved = parents.filter(function(p){ return p.status === 'approved'; });
           var rejected = parents.filter(function(p){ return p.status === 'rejected'; });
+          var resets = parents.filter(function(p){ return !!p.resetRequest; });
 
           var pendingEl = document.getElementById('pendingList');
           pendingEl.innerHTML = '';
           if (pending.length === 0) { pendingEl.innerHTML = '<div class="empty">No pending requests.</div>'; }
           pending.forEach(function(p){ pendingEl.appendChild(renderCard(p, true)); });
+
+          var resetEl = document.getElementById('resetList');
+          resetEl.innerHTML = '';
+          if (resets.length === 0) { resetEl.innerHTML = '<div class="empty">No password reset requests.</div>'; }
+          resets.forEach(function(p){ resetEl.appendChild(renderResetCard(p)); });
 
           var approvedEl = document.getElementById('approvedList');
           approvedEl.innerHTML = '';

@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
     const db = await getDb();
     const parents = await db
       .collection('parents')
-      .find({}, { projection: { passwordHash: 0 } })
+      .find({}, { projection: { passwordHash: 0, 'resetRequest.passwordHash': 0 } })
       .sort({ createdAt: -1 })
       .toArray();
     res.statusCode = 200;

@@ -11,9 +11,9 @@ module.exports = async (req, res) => {
   try {
     const { name, email, childName, team, password } = req.body || {};
 
-    if (!name || !email || !password) {
+    if (!name || !email || !childName || !team || !password) {
       res.statusCode = 400;
-      res.json({ error: 'Please fill in your name, email, and a password.' });
+      res.json({ error: 'Please fill in your name, email, child\'s name, child\'s team, and a password.' });
       return;
     }
     if (password.length < 8) {
