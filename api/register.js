@@ -48,6 +48,7 @@ module.exports = async (req, res) => {
     res.statusCode = 200;
     res.json({ ok: true });
   } catch (err) {
+    console.error('REGISTER_ERROR', err && err.message, err && err.stack);
     res.statusCode = 500;
     res.json({ error: 'Something went wrong. Please try again in a moment.' });
   }
