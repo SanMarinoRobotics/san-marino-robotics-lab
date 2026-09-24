@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin — San Marino Robotics Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7fa; --surface:#ffffff; --surface-2:#eef2f7; --border:#dde3ea;
+    --text:#11161d; --text-dim:#57606b; --accent:#e2231a; --accent-2:#c81810;
+    --accent-soft:#fdeceb; --steel:#1a63e0; --steel-soft:#e8f0fe;
+    --success:#1f9d55; --success-soft:#e4f7ea; --warning:#b9790b; --warning-soft:#fff3d6;
+    --danger:#c81810; --danger-soft:#fdeceb;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:"IBM Plex Sans",sans-serif; padding:20px;}
+  .wrap{max-width:720px; margin:0 auto;}
+  h1{font-family:"Big Shoulders Display",sans-serif; font-weight:800; text-transform:uppercase; font-size:26px; margin:0 0 4px;}
+  p.sub{color:var(--text-dim); font-size:14px; margin:0 0 28px;}
+  .section-title{
+    font-family:"IBM Plex Mono",monospace; font-size:12px; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--accent-2); margin:28px 0 12px;
+  }
+  .card{background:var(--surface); border:1px solid var(--border); padding:16px 18px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+  .card .info{flex:1; min-width:200px;}
+  .card .name{font-weight:700; font-size:15px;}
+  .card .email{color:var(--text-dim); font-size:13px;}
+  .card .meta{color:var(--text-dim); font-size:12.5px; margin-top:4px;}
+  .badge{font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:3px 9px; border:1px solid currentColor;}
+  .badge.pending{color:var(--warning);}
+  .badge.approved{color:var(--success);}
+  .badge.rejected{color:var(--danger);}
+  .actions{display:flex; gap:8px;}
+  button{
+    border:none; padding:9px 14px; font-weight:700; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase;
+    cursor:pointer; font-family:"IBM Plex Sans",sans-serif;
+  }
+  .btn-approve{background:var(--success); color:#fff;}
+  .btn-reject{background:var(--surface-2); color:var(--text-dim); border:1px solid var(--border);}
+  .empty{color:var(--text-dim); font-size:14px; padding:16px 0;}
+  .error{background:var(--danger-soft); color:var(--danger); padding:16px; text-align:center; font-size:14px;}
+  #app{display:none;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Parent Accounts</h1>
+    <p class="sub">San Marino Robotics Lab — admin panel</p>
+    <div id="error" class="error" style="display:none;"></div>
+    <div id="app">
+      <div class="section-title">Pending Requests</div>
+      <div id="pendingList"></div>
+      <div class="section-title">Approved</div>
+      <div id="approvedList"></div>
+      <div class="section-title">Rejected</div>
+      <div id="rejectedList"></div>
+    </div>
+  </div>
+
+  <script>
+    function fmtDate(d){
+      if (!d) return '';
+      var date = new Date(d);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function renderCard(p, withActions){
+      var div = document.createElement('div');
+      div.className = 'card';
+      var badgeClass = p.status;
+      div.innerHTML =
+        '<div class="info">' +
+          '<div class="name">' + (p.name || '(no name)') + ' <span class="badge ' + badgeClass + '">' + p.status + '</span></div>' +
+          '<div class="email">' + p.email + '</div>' +
+          '<div class="meta">Child: ' + (p.childName || '?') + ' &middot; Team: ' + (p.team || '?') + ' &middot; Requested ' + fmtDate(p.createdAt) + '</div>' +
+        '</div>';
+      if (withActions) {
+        var actions = document.createElement('div');
+        actions.className = 'actions';
+
+        var approveBtn = document.createElement('button');
+        approveBtn.className = 'btn-approve';
+        approveBtn.textContent = 'Approve';
+        approveBtn.onclick = function(){ decide(p.email, 'approve'); };
+
+        var rejectBtn = document.createElement('button');
+        rejectBtn.className = 'btn-reject';
+        rejectBtn.textContent = 'Reject';
+        rejectBtn.onclick = function(){ decide(p.email, 'reject'); };
+
+        actions.appendChild(approveBtn);
+        actions.appendChild(rejectBtn);
+        div.appendChild(actions);
+      }
+      return div;
+    }
+
+    function decide(email, action){
+      fetch('/api/admin-approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, action: action })
+      }).then(function(){ load(); });
+    }
+
+    function load(){
+      fetch('/api/admin-list')
+        .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+        .then(function(res){
+          if (!res.ok) {
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error').textContent = res.data.error === 'Not authorized.'
+              ? 'Not authorized. Please open your admin login link first, then reload this page.'
+              : (res.data.error || 'Something went wrong.');
+            document.getElementById('app').style.display = 'none';
+            return;
+          }
+          document.getElementById('error').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+
+          var parents = res.data.parents || [];
+          var pending = parents.filter(function(p){ return p.status === 'pending'; });
+          var approved = parents.filter(function(p){ return p.status === 'approved'; });
+          var rejected = parents.filter(function(p){ return p.status === 'rejected'; });
+
+          var pendingEl = document.getElementById('pendingList');
+          pendingEl.innerHTML = '';
+          if (pending.length === 0) { pendingEl.innerHTML = '<div class="empty">No pending requests.</div>'; }
+          pending.forEach(function(p){ pendingEl.appendChild(renderCard(p, true)); });
+
+          var approvedEl = document.getElementById('approvedList');
+          approvedEl.innerHTML = '';
+          if (approved.length === 0) { approvedEl.innerHTML = '<div class="empty">No approved parents yet.</div>'; }
+          approved.forEach(function(p){ approvedEl.appendChild(renderCard(p, false)); });
+
+          var rejectedEl = document.getElementById('rejectedList');
+          rejectedEl.innerHTML = '';
+          if (rejected.length === 0) { rejectedEl.innerHTML = '<div class="empty">None.</div>'; }
+          rejected.forEach(function(p){ rejectedEl.appendChild(renderCard(p, false)); });
+        })
+        .catch(function(){
+          document.getElementById('error').style.display = 'block';
+          document.getElementById('error').textContent = 'Network error.';
+        });
+    }
+
+    load();
+  </script>
+</body>
+</html>

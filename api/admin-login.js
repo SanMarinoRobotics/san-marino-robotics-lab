@@ -12,7 +12,9 @@ module.exports = (req, res) => {
   }
 
   setSessionCookie(res, 'admin@san-marino-robotics-lab');
+  var next = url.searchParams.get('next');
+  var safeNext = next === '/admin.html' ? next : '/';
   res.statusCode = 302;
-  res.setHeader('Location', '/');
+  res.setHeader('Location', safeNext);
   res.end();
 };
