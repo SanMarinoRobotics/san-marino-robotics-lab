@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 const COOKIE_NAME = 'sma_session';
-const LONG_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days — "keep me logged in"
+const LONG_TTL_SECONDS = 60 * 60 * 24 * 1; // 1 day — "keep me logged in"
 const SHORT_TTL_SECONDS = 60 * 60 * 12; // 12 hours — not remembered
 
 function getSecret() {
